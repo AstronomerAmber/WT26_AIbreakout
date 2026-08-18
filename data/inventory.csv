@@ -1,0 +1,6 @@
+store_id,ingredient,on_hand_units,forecast_7d_units,reorder_eta_days,stockout_risk
+104,espresso beans,180,150,2,low
+117,oat milk,42,96,5,high
+117,espresso beans,80,135,4,high
+122,cold brew concentrate,70,82,2,medium
+130,oat milk,110,90,1,low

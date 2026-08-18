@@ -1,0 +1,5 @@
+store_id,week,scheduled_training_hours,completed_training_hours,converted_training_hours,conversion_reason
+104,2026-W27,42,25,14,rush window service coverage
+117,2026-W27,36,35,0,
+122,2026-W27,38,34,3,sick call coverage
+130,2026-W27,40,39,0,

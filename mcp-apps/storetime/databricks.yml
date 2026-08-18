@@ -1,0 +1,20 @@
+bundle:
+  name: bobabricks-storetime-mcp
+
+resources:
+  apps:
+    bobabricks_storetime_mcp:
+      name: "bobabricks-storetime-mcp"
+      description: "Bobabricks StoreTime MCP"
+      git_repository:
+        provider: github
+        url: https://github.com/AstronomerAmber/WT26_AIbreakout.git
+      git_source:
+        branch: main
+        source_code_path: mcp-apps/storetime
+
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://fevm-worldtour-ai.cloud.databricks.com

@@ -1,0 +1,5 @@
+policies:
+  budget_guardrails:
+    gateway: unity_ai_gateway
+    mode: platform_enforced
+    note: Budgets and usage are enforced and attributed at the Unity AI Gateway layer, per agent and per team. Shown in the demo under AI Gateway budgets and the usage dashboard.

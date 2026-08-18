@@ -1,0 +1,14 @@
+[
+  {
+    "task_id": "OPS-2194",
+    "store_id": 104,
+    "title": "Review training shift protection",
+    "status": "open"
+  },
+  {
+    "task_id": "OPS-2201",
+    "store_id": 122,
+    "title": "Investigate peak wait times",
+    "status": "open"
+  }
+]

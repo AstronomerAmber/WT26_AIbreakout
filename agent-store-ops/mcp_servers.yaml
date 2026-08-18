@@ -1,0 +1,54 @@
+mcp_servers:
+  genie_agent:
+    type: databricks_genie
+    description: Governed store operations analytics over Bobabricks metrics, including first-pass inventory facts.
+    config:
+      space_name: bobabricks_store_operations
+      warehouse: ${DATABRICKS_WAREHOUSE_ID}
+      catalogs:
+        - ${DATABRICKS_CATALOG:-bobabricks_demo}
+      schemas:
+        - ${DATABRICKS_SCHEMA:-store_ops}
+
+  storetime:
+    type: databricks_app_mcp
+    description: StoreTime labor, scheduling, training-shift, and service coverage diagnostics backed by demo Delta tables.
+    config:
+      app_name: ${STORETIME_APP_NAME:-bobabricks-storetime-mcp}
+      endpoint_path: /mcp
+      tables:
+        schedules: ${DATABRICKS_CATALOG:-bobabricks_demo}.${DATABRICKS_SCHEMA:-store_ops}.schedules
+        training_events: ${DATABRICKS_CATALOG:-bobabricks_demo}.${DATABRICKS_SCHEMA:-store_ops}.training_events
+
+  ops_task:
+    type: databricks_app_mcp
+    description: OpsTask ticket lookup and approval-gated follow-up task creation backed by demo Delta tables.
+    config:
+      app_name: ${OPSTASK_APP_NAME:-bobabricks-opstask-mcp}
+      endpoint_path: /mcp
+      tables:
+        ops_tasks: ${DATABRICKS_CATALOG:-bobabricks_demo}.${DATABRICKS_SCHEMA:-store_ops}.ops_tasks
+
+  atlassian_confluence:
+    type: managed_atlassian_mcp
+    enabled: ${CONFLUENCE_MCP_ENABLED:-true}
+    description: Managed Atlassian Confluence MCP for FY26 goals, operating standards, and store playbooks.
+    config:
+      url: ${ATLASSIAN_MCP_URL}
+      pages:
+        - FY26 Store Operations Goals
+        - Training Completion Operating Standard
+        - Inventory Stockout Escalation Playbook
+        - Pacific Region Weekly Review Playbook
+
+  inventory_app:
+    type: databricks_app_mcp
+    enabled: ${INVENTORY_APP_MCP_ENABLED:-false}
+    description: Optional Inventory MCP for ingredient availability, depletion forecasts, and likely stockout risk.
+    config:
+      app_name: ${INVENTORY_APP_NAME:-bobabricks-inventory-mcp}
+      endpoint_path: /mcp
+      tables:
+        inventory: ${DATABRICKS_CATALOG:-bobabricks_demo}.${DATABRICKS_SCHEMA:-store_ops}.inventory
+    notes: >-
+      Disabled for the short demo: Inventory is never surfaced as its own tool. The app code lives in mcp-apps/inventory and can be re-enabled with INVENTORY_APP_MCP_ENABLED=true for the long version (see archive/long-version/). Genie remains the governed analytics path for inventory facts.

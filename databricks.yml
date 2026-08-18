@@ -1,0 +1,24 @@
+bundle:
+  name: wt26_aibreakout
+
+resources:
+  apps:
+    bobabricks_store_ops_demo:
+      name: "bobabricks-store-ops-demo"
+      description: "Bobabricks Store Operations Agent demo"
+      user_api_scopes:
+        - ai-gateway
+        - genie
+        - mcp.external
+      git_repository:
+        provider: gitHub
+        url: https://github.com/AstronomerAmber/WT26_AIbreakout.git
+      git_source:
+        branch: main
+        source_code_path: .
+
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://fevm-worldtour-ai.cloud.databricks.com

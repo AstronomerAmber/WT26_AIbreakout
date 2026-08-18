@@ -1,0 +1,9 @@
+.DS_Store
+.tmp/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env.databricks.local
+.databricks/

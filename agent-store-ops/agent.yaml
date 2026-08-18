@@ -1,0 +1,17 @@
+name: agent-store-ops
+description: Bobabricks Store Operations Agent for store performance Q&A.
+version: 0.1.0
+
+model:
+  provider: databricks
+  endpoint: unity-ai-gateway://bobabricks-store-ops
+
+system_prompt: ./system_prompt.md
+mcp_servers: ./mcp_servers.yaml
+tools: ./tools.yaml
+policies: ./policies.yaml
+sample_data_dir: ../data
+
+capabilities:
+  - baseline_store_operations_qa
+  - confluence_goal_and_playbook_lookup_after_upgrade

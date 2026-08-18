@@ -1,0 +1,20 @@
+bundle:
+  name: bobabricks-opstask-mcp
+
+resources:
+  apps:
+    bobabricks_opstask_mcp:
+      name: "bobabricks-opstask-mcp"
+      description: "Bobabricks OpsTask MCP"
+      git_repository:
+        provider: github
+        url: https://github.com/AstronomerAmber/WT26_AIbreakout.git
+      git_source:
+        branch: main
+        source_code_path: mcp-apps/opstask
+
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://fevm-worldtour-ai.cloud.databricks.com

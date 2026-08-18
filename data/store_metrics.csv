@@ -1,0 +1,5 @@
+region,store_id,store_name,sales_vs_plan_pct,training_completion_pct,avg_wait_minutes,customer_satisfaction
+Pacific,104,Seattle Pike Place,-3.2,81,6.8,4.1
+Pacific,117,Portland Pearl,-5.8,96,5.2,4.4
+Pacific,122,San Francisco Market,-1.1,94,8.4,3.8
+Pacific,130,San Diego Harbor,2.4,98,4.1,4.7
