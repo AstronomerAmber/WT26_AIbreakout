@@ -4,6 +4,54 @@
 
 ---
 
+## Presenter Setup (do this before you run the demo)
+
+This demo runs against the **fevm-worldtour-ai** Databricks workspace and the app `bobabricks-store-ops-demo`. The repo is `https://github.com/AstronomerAmber/WT26_AIbreakout`.
+
+### One-time prerequisites
+
+1. **Workspace access** to `https://fevm-worldtour-ai.cloud.databricks.com` (the demo app, Genie space, warehouse, and MCP apps already live here).
+2. **Databricks CLI profile** named `fevm-worldtour-ai`:
+   ```bash
+   databricks auth login --host https://fevm-worldtour-ai.cloud.databricks.com --profile fevm-worldtour-ai
+   ```
+3. **Clone the repo** locally:
+   ```bash
+   git clone https://github.com/AstronomerAmber/WT26_AIbreakout.git
+   ```
+4. **Atlassian Confluence consent (one-time, per presenter).** The Confluence tool uses the managed connection `system_ai_agent_atlassian_mcp` with per-user OAuth. Authorize it once at:
+   `https://fevm-worldtour-ai.cloud.databricks.com/explore/connections/system_ai_agent_atlassian_mcp` → **Sign in / Authorize** (Atlassian). Without this, the post-upgrade Confluence answer fails with an auth error.
+5. **Omnigent** installed (`omni`/`omnigent` CLI).
+
+### Stage the app at baseline (before each run)
+
+The demo starts *without* Confluence so the gap is real. If a prior run left it upgraded, reset it:
+```bash
+cd WT26_AIbreakout
+git checkout -- .           # ensure baseline repo state (no Confluence)
+databricks sync --full . /Workspace/Users/<your-email>/WT26_AIbreakout --profile fevm-worldtour-ai
+databricks apps deploy bobabricks-store-ops-demo \
+  --profile fevm-worldtour-ai \
+  --source-code-path /Workspace/Users/<your-email>/WT26_AIbreakout
+```
+Confirm in the app that "What tools do you have?" lists **Genie, StoreTime, OpsTask** only (no Confluence).
+
+### Connect Omnigent (for Step 5)
+
+1. Log in to the Omnigent server (browser flow):
+   ```bash
+   omnigent login https://fevm-worldtour-ai.cloud.databricks.com/api/2.0/omnigent
+   ```
+2. Register this machine as a host:
+   ```bash
+   omnigent host --server https://fevm-worldtour-ai.cloud.databricks.com/api/2.0/omnigent
+   ```
+3. In the Omnigent UI, start a session with: **host = this machine**, **working directory = your local `WT26_AIbreakout` clone**, **worktree branch = blank**, **agent = Codex**.
+
+`AGENTS.md` in the repo tells Codex exactly how to make the one-tool Confluence upgrade and how to redeploy (profile `fevm-worldtour-ai`, sync + `apps deploy` against the workspace path). You don't need to memorize the commands — Codex follows that file.
+
+---
+
 ## Step 0: Architecture Diagram
 
 **Say:** Thank you, Patrick, for that introduction. Hello everyone, my name is Amber Roberts and I'm a technical marketing engineer at Databricks. Last month at the Data & AI summit Databricks released a lot of enhanced capabilities around building and maintaining AI systems, and I wanted to walk you though some of them. Let's get started!
@@ -77,11 +125,19 @@ So let's look at Store 104. It's both a scheduling problem, but it's primarily a
 
 ## Step 5: Fix With Omnigent
 
-**Transition:** So what we're going to do is go back into Omnigent, and I'm going to run omnigent codex, this is the harness that wraps Codex, OpenAI's coding agent, right inside Omnigent's terminal, and ask it for an upgrade here.
+**Transition:** So what we're going to do is go back into Omnigent — the harness that wraps Codex, OpenAI's coding agent — and ask it for an upgrade.
+
+**Prerequisite:** You've cloned the demo repo locally (`git clone https://github.com/AstronomerAmber/WT26_AIbreakout.git`) and connected your machine as an Omnigent host — see Presenter Setup.
+
+**Before asking, in the Omnigent new-session screen, select:**
+- **Host:** your connected host (your own machine, shown green)
+- **Working directory:** your local `WT26_AIbreakout` clone
+- **Git worktree branch:** leave **blank** (start directly in the working directory)
+- **Agent:** **Codex**
 
 **Ask Codex/Omnigent:** For the Bobabricks store operations agent, can you add our FY26 goals and store playbooks as context? Please add the Atlassian Confluence MCP so the agent can pull from Confluence directly, and redeploy the app.
 
-**Say (while it works):** So it's going to start working on that for me. Before it redeploys, it should stop and ask me to approve that deployment, so I still have a human checkpoint before this changes the running app. That's what's really nice about using Databricks Apps as a backend, it's actually really quick to spin up an app, and it's also really quick to modify and redeploy, so it makes your development cycle much easier. Let's let it work and come back.
+**Say (while it works):** So it's going to start working on that for me, and we'll see here in a couple minutes when it redeploys the app. We can also see that smart routing automatically kicked off in order to keep costs down, Omnigent is finding the best GPT model for the task.
 
 ---
 
