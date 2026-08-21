@@ -29,18 +29,6 @@ mcp_servers:
       tables:
         ops_tasks: ${DATABRICKS_CATALOG:-bobabricks_demo}.${DATABRICKS_SCHEMA:-store_ops}.ops_tasks
 
-  atlassian_confluence:
-    type: managed_atlassian_mcp
-    enabled: ${CONFLUENCE_MCP_ENABLED:-true}
-    description: Managed Atlassian Confluence MCP for FY26 goals, operating standards, and store playbooks.
-    config:
-      url: ${ATLASSIAN_MCP_URL}
-      pages:
-        - FY26 Store Operations Goals
-        - Training Completion Operating Standard
-        - Inventory Stockout Escalation Playbook
-        - Pacific Region Weekly Review Playbook
-
   inventory_app:
     type: databricks_app_mcp
     enabled: ${INVENTORY_APP_MCP_ENABLED:-false}

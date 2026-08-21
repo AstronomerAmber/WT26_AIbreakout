@@ -43,7 +43,3 @@ env:
     value: bobabricks-opstask-mcp
   - name: OPSTASK_MCP_URL
     value: https://bobabricks-opstask-mcp-7474657163903557.aws.databricksapps.com/mcp
-  - name: CONFLUENCE_MCP_ENABLED
-    value: "true"
-  - name: ATLASSIAN_MCP_URL
-    value: https://fevm-worldtour-ai.cloud.databricks.com/api/2.0/mcp/external/system_ai_agent_atlassian_mcp
