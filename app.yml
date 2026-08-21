@@ -10,7 +10,7 @@ env:
   - name: MLFLOW_REGISTRY_URI
     value: databricks-uc
   - name: MLFLOW_EXPERIMENT_NAME
-    value: /Users/amber.roberts@databricks.com/mas-0d6cf28f-dev-experiment
+    value: /Users/amber.roberts@databricks.com/bobabricks-store-ops-demo
   - name: GENIE_SPACE_ID
     value: 01f1968067e81bd09eacb0d88bcc57de
   - name: ENABLE_GENIE_MCP
