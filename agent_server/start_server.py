@@ -70,7 +70,10 @@ async def _lifespan(app):
 
 agent_server.app.router.lifespan_context = _lifespan
 app = agent_server.app
-setup_mlflow_git_based_version_tracking()
+try:
+    setup_mlflow_git_based_version_tracking()
+except Exception as exc:
+    logger.warning("MLflow version tracking setup failed; continuing app startup: %s", exc, exc_info=True)
 
 
 def main():
