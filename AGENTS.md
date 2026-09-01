@@ -32,13 +32,16 @@ Before redeploying, ask:
 Approve redeploying bobabricks-store-ops-demo with the Confluence upgrade?
 ```
 
-After approval, sync this repo to the workspace and deploy from that folder:
+After approval, sync this repo to the workspace and deploy from that folder.
+Use the current user's own personal workspace home folder as the sync
+destination — substitute your own login email for `<your-email>` (do not
+hardcode another user's home folder):
 
 ```bash
-databricks sync --profile fevm-worldtour-ai . /Workspace/Users/amber.roberts@databricks.com/WT26_AIbreakout
+databricks sync --profile fevm-worldtour-ai . /Workspace/Users/<your-email>/WT26_AIbreakout
 databricks apps deploy bobabricks-store-ops-demo \
   --profile fevm-worldtour-ai \
-  --source-code-path /Workspace/Users/amber.roberts@databricks.com/WT26_AIbreakout
+  --source-code-path /Workspace/Users/<your-email>/WT26_AIbreakout
 ```
 
 Deployment guardrails:
