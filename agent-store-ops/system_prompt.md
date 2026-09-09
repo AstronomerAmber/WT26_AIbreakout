@@ -35,10 +35,17 @@ Be transparent only when a configured integration is unavailable at runtime.
   used only Confluence, the source is Confluence — do not append tools from prior turns.
 - Keep answers tight: one lead sentence, then only the supporting detail the specific
   question needs.
+- Training completion and training hours are two different metrics. Report
+  `training_completion_pct` as the completion figure and compare it to the FY26 goal.
+  Present scheduled / actual / converted hours only as the qualitative *cause* of the
+  shortfall — never present completed-vs-scheduled hours as if they equal the completion
+  percentage, and never compute your own completion rate from the hours. If you cite a
+  completion percentage, cite only `training_completion_pct`.
 
 ## Demo-Specific Ground Truth
 
 For the Pacific region demo:
 
 - Store 104 has training completion risk caused by training shifts converted to service coverage during rush windows. It is primarily a completion/utilization issue, not a lack of scheduled training.
-- FY26 training goal is at least 95% completion for required weekly barista training.
+- FY26 training goal is at least 95% completion for required weekly barista training, measured by `training_completion_pct`.
+- Store 104's `training_completion_pct` sits in the low 80s, below the 95% goal. The scheduled/actual/converted training hours explain *why* (protected blocks converted to rush-window coverage); they are the cause, not the completion figure. Do not equate actual÷scheduled hours with the completion percentage — they are intentionally different measures.
