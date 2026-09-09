@@ -30,6 +30,39 @@ from agent_server.utils import (
 set_default_openai_client(AsyncDatabricksOpenAI())
 set_default_openai_api("chat_completions")
 set_trace_processors([])
+
+
+def _configure_uc_trace_location() -> None:
+    """Bind the active MLflow experiment to a Unity Catalog trace location so traces
+    are governed and queryable in UC (and appear in UC-backed trace views), instead of
+    the legacy workspace/DBFS trace store. No-op unless the UC trace env vars are set.
+
+    trace_location can only be set when the experiment is created, so MLFLOW_EXPERIMENT_NAME
+    must point at a new experiment name (not a pre-existing legacy one)."""
+    catalog = os.environ.get("MLFLOW_TRACE_UC_CATALOG")
+    schema = os.environ.get("MLFLOW_TRACE_UC_SCHEMA")
+    experiment_name = os.environ.get("MLFLOW_EXPERIMENT_NAME")
+    if not (catalog and schema and experiment_name):
+        return
+    from mlflow.entities.trace_location import UnityCatalog
+
+    mlflow.set_experiment(
+        experiment_name=experiment_name,
+        trace_location=UnityCatalog(
+            catalog_name=catalog,
+            schema_name=schema,
+            table_prefix=os.environ.get("MLFLOW_TRACE_UC_TABLE_PREFIX", "bobabricks"),
+        ),
+    )
+
+
+try:
+    _configure_uc_trace_location()
+except Exception as exc:  # non-fatal: fall back to default tracing so the app still starts
+    logging.getLogger(__name__).warning(
+        "UC trace location setup failed; continuing with default tracing: %s", exc, exc_info=True
+    )
+
 mlflow.openai.autolog()
 logging.getLogger("mlflow.utils.autologging_utils").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)

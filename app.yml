@@ -10,7 +10,13 @@ env:
   - name: MLFLOW_REGISTRY_URI
     value: databricks-uc
   - name: MLFLOW_EXPERIMENT_NAME
-    value: /Users/amber.roberts@databricks.com/bobabricks-store-ops-demo
+    value: /Users/ad341da9-d12e-4688-ad1c-3c049cf70486/bobabricks-store-ops-demo-uc
+  - name: MLFLOW_TRACE_UC_CATALOG
+    value: worldtour_ai_catalog
+  - name: MLFLOW_TRACE_UC_SCHEMA
+    value: ai_gateway_demo
+  - name: MLFLOW_TRACE_UC_TABLE_PREFIX
+    value: bobabricks
   - name: GENIE_SPACE_ID
     value: 01f1968067e81bd09eacb0d88bcc57de
   - name: ENABLE_GENIE_MCP
