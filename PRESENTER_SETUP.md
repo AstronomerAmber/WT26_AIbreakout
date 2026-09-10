@@ -20,6 +20,21 @@ You also need to be able to **log in to** `https://fevm-worldtour-ai.cloud.datab
 If you can't reach the workspace or the app, ask the demo owner to confirm your group
 membership and workspace access.
 
+### Workspace-owner note: backing service principals (one-time per workspace)
+
+The agent app and its two backing MCP apps each run as their **own** service principal,
+and each SP needs Unity Catalog access to `worldtour_ai_catalog` — these are grants on
+the SPs, not captured in this repo. If the demo is stood up in a fresh workspace, grant:
+
+| Service principal | Grants |
+|---|---|
+| `bobabricks-store-ops-demo` (agent app) | `USE_CATALOG`; `USE_SCHEMA` + `CREATE_TABLE` on `ai_gateway_demo` (for UC trace tables) |
+| `bobabricks-storetime-mcp` | `USE_CATALOG`; `USE_SCHEMA` + `SELECT` on `bobabricks_store_ops` |
+| `bobabricks-opstask-mcp` | `USE_CATALOG`; `USE_SCHEMA` + `SELECT` on `bobabricks_store_ops`; `MODIFY` on `ops_tasks` |
+
+Symptom if missing: an MCP tool span fails with
+`[INSUFFICIENT_PERMISSIONS] User does not have USE CATALOG on Catalog 'worldtour_ai_catalog'`.
+
 ## One-time setup
 
 1. **Databricks CLI** installed, with a profile named `fevm-worldtour-ai`:
