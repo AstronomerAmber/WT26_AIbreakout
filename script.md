@@ -10,7 +10,7 @@ This demo runs against the **fevm-worldtour-ai** Databricks workspace and the ap
 
 ### One-time prerequisites
 
-1. **Workspace access** to `https://fevm-worldtour-ai.cloud.databricks.com` (the demo app, Genie space, warehouse, and MCP apps already live here).
+1. **Workspace access** to `https://fevm-worldtour-ai.cloud.databricks.com` (the demo app, Genie Agent, warehouse, and MCP apps already live here).
 2. **Databricks CLI profile** named `fevm-worldtour-ai`:
    ```bash
    databricks auth login --host https://fevm-worldtour-ai.cloud.databricks.com --profile fevm-worldtour-ai
@@ -79,7 +79,7 @@ Now let's open up Databricks Apps here and click on my Bobabricks agent here. [o
 So what I'm going to do is go ahead and ask it, really quickly, what tools do you have? We'll see what it started out with.
 
 **Expected response, agent lists:**
-- Genie Space (store operations data)
+- Genie Agent (store operations data)
 - StoreTime (labor and scheduling)
 - OpsTask (tickets and task tracking)
 
@@ -95,7 +95,7 @@ So what I'm going to do is go ahead and ask it, really quickly, what tools do yo
 
 **Expected result:** Store 104 / Seattle Pike Place is flagged as falling behind, with regional scheduled and completed training-hour averages.
 
-**Say:** So for Bobabricks, we have some training goals we want to meet this year, we want to make sure our employees are staying up to date with everything they should be doing. It's going to first query my Genie space here, so I didn't have to build out this UI, but you can customize it. I can see I do have a store falling behind, it was able to reach out to Genie, run that query for me, and return and format that response.
+**Say:** So for Bobabricks, we have some training goals we want to meet this year, we want to make sure our employees are staying up to date with everything they should be doing. It's going to first query my Genie Agent here, so I didn't have to build out this UI, but you can customize it. I can see I do have a store falling behind, it was able to reach out to Genie, run that query for me, and return and format that response.
 
 ---
 

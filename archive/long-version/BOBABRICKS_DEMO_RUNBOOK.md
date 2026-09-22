@@ -26,7 +26,7 @@ Explain the architecture left to right:
 - Bobabricks employee uses a chat interface.
 - Store Operations Agent sits in the middle as the reasoning layer.
 - Tools include Genie Agent, StoreTime, OpsTask, Confluence, Inventory MCP, and Lakebase Memory.
-- Platform services include Agent Bricks, Genie Spaces, MLflow, Unity AI Gateway, Workflows, Databricks Apps, and Governance.
+- Platform services include Agent Bricks, Genie Agents, MLflow, Unity AI Gateway, Workflows, Databricks Apps, and Governance.
 
 Message:
 
@@ -37,7 +37,7 @@ This is not just a chatbot. It is an operational agent connected to governed ent
 ## 1. Pre-Demo Setup
 - Authenticate the Databricks CLI with the `bigrock` profile.
 - Sync and deploy BigRock assets into the Databricks workspace.
-- Confirm the demo app, Genie space, SQL warehouse, Unity AI Gateway endpoint, MLflow experiment, and budget policy are available.
+- Confirm the demo app, Genie Agent, SQL warehouse, Unity AI Gateway endpoint, MLflow experiment, and budget policy are available.
 - For local trace generation only, export Databricks auth and MLflow settings before running the app:
 
 ```bash

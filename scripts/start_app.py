@@ -432,10 +432,10 @@ class ProcessManager:
                     "const PurePreviewMessage = ({",
                     """function bobabricksToolDisplayName(toolName: string) {
   if (/^query_space_[0-9a-f]+$/.test(toolName)) {
-    return 'Genie Space [bobabricks_store_operations]';
+    return 'Genie Agent [bobabricks_store_operations]';
   }
   if (/^poll_response_[0-9a-f]+$/.test(toolName)) {
-    return 'Genie Space [bobabricks_store_operations]';
+    return 'Genie Agent [bobabricks_store_operations]';
   }
   if (['inspect_schedule', 'list_training_events'].includes(toolName)) {
     return 'MCP[bobabricks-storetime-mcp]';
@@ -451,7 +451,7 @@ const PurePreviewMessage = ({""",
                 )
             message_text = message_text.replace(
                 "return 'bobabricks_store_operations';",
-                "return 'Genie Space [bobabricks_store_operations]';",
+                "return 'Genie Agent [bobabricks_store_operations]';",
             )
             if "MCP[bobabricks-storetime-mcp]" not in message_text:
                 message_text = message_text.replace(

@@ -80,9 +80,9 @@ def _enrich_agent_spans() -> None:
                 return value
             text = str(value)
             if re.fullmatch(r"query_space_[0-9a-f]+", text):
-                return "Genie Space [bobabricks_store_operations]"
+                return "Genie Agent [bobabricks_store_operations]"
             if re.fullmatch(r"poll_response_[0-9a-f]+", text):
-                return "Genie Space [bobabricks_store_operations]"
+                return "Genie Agent [bobabricks_store_operations]"
             if text in {"inspect_schedule", "list_training_events"}:
                 return "MCP[bobabricks-storetime-mcp]"
             if text in {"list_existing_ops_tasks", "create_ops_task"}:
@@ -148,7 +148,7 @@ AGENT_INSTRUCTIONS = """\
 You are the Bobabricks Store Operations Agent for regional store leaders.
 
 Use the attached tools directly:
-- Genie Space for governed Bobabricks store metrics, training completion, wait time, and regional performance.
+- Genie Agent for governed Bobabricks store metrics, training completion, wait time, and regional performance.
 - StoreTime for schedules, training blocks, converted hours, and coverage reasons.
 - OpsTask for existing follow-up tickets and task tracking.
 - Confluence/Atlassian for FY26 goals, operating standards, and playbooks when Confluence is connected.
@@ -171,7 +171,7 @@ headings, bold labels, bullet lists, or repeated "what it contains / what it can
 do / what it cannot do" sections. The table columns should be: Tool, Name,
 Contains, Can do, Cannot do. Keep each cell short enough to scan.
 For the baseline state, use these rows:
-- Tool Genie Space; Name bobabricks_store_operations; Contains governed store
+- Tool Genie Agent; Name bobabricks_store_operations; Contains governed store
   metrics, region, training completion, scheduled/completed hours, wait time;
   Can do analytics, comparisons, completion tables; Cannot do tasks, schedule
   updates, approvals, or policy.
@@ -282,7 +282,7 @@ answer must include Confluence in the final source line when that tool was
 called and StoreTime when StoreTime was called.
 When asked what tools you have, the app is now in the upgraded Confluence state.
 Answer with exactly these four rows in one compact markdown table:
-- Tool Genie Space; Name bobabricks_store_operations; Contains governed store
+- Tool Genie Agent; Name bobabricks_store_operations; Contains governed store
   metrics, region, training completion, scheduled/completed hours, wait time;
   Can do analytics, comparisons, completion tables; Cannot do tasks, schedule
   updates, approvals, or policy.

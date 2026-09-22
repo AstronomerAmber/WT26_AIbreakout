@@ -11,7 +11,7 @@ You need to be a member of the **`Agentbricks_speakers`** group. Membership give
 | Resource | Access | Purpose |
 |---|---|---|
 | App `bobabricks-store-ops-demo` | CAN_MANAGE | deploy / redeploy the agent |
-| Genie space (store ops) | CAN_RUN | agent can query governed metrics |
+| Genie Agent (store ops) | CAN_RUN | agent can query governed metrics |
 | Catalog `worldtour_ai_catalog` | USE + SELECT | read the store-ops data |
 | SQL warehouse | CAN_USE (via `users`) | run Genie/SQL |
 | Confluence connection `system_ai_agent_atlassian_mcp` | USE (via `account users`) | company-context tool |
@@ -69,7 +69,7 @@ omnigent host  --server https://fevm-worldtour-ai.cloud.databricks.com/api/2.0/o
 
 ## You do NOT re-create any data
 
-The catalog `worldtour_ai_catalog.bobabricks_store_ops` (12 tables), the Genie space,
+The catalog `worldtour_ai_catalog.bobabricks_store_ops` (12 tables), the Genie Agent,
 the SQL warehouse, the StoreTime/OpsTask MCP apps, and the Confluence connection all
 already exist in the shared workspace. **Never rebuild them.** Your only per-machine
 job is to deploy the app code (below) — group membership already gives you read access

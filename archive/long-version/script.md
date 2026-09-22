@@ -15,7 +15,7 @@ At a high level, Agent Bricks is our enterprise agent development platform, and 
 
 So as we walk through this, what you'll be able to see is that I have a Genie agent in here. This is my store operations data, so how are stores doing against their goals, how many people are working different shifts, information like that. I have two custom MCPs here, StoreTime and OpsTask. In my company, this is my own labor and scheduling system, which I built and deployed on Databricks apps. That's a really great option if you want to connect to your internal systems, but maybe you haven't built out an MCP server yet.
 
-And then I have Confluence, a built-in tool, because that has context for my overall FY26 goals as Bobabricks. It'll come built in with memory too, split into short-term and long-term memory APIs, I'll show you that as well. And we'll also get a glimpse of some of these platform services, like MLflow and Unity AI Gateway, along with Genie Spaces, Workflows, Databricks Apps, and governance.
+And then I have Confluence, a built-in tool, because that has context for my overall FY26 goals as Bobabricks. It'll come built in with memory too, split into short-term and long-term memory APIs, I'll show you that as well. And we'll also get a glimpse of some of these platform services, like MLflow and Unity AI Gateway, along with Genie Agents, Workflows, Databricks Apps, and governance.
 
 And down here at the bottom, you can see I started from one of our app templates, built on the OpenAI Agents SDK, running on GPT models through Unity AI Gateway, and it comes with Codex and Omnigent already wired in. Omnigent is our new meta harness for using coding agents like Codex, and that's what's going to let me upgrade this agent myself later.
 
@@ -54,7 +54,7 @@ Show the average versus actual training hours for my stores in my Pacific region
 **Expected result:** A named store (e.g., Store 104) comes back behind on training, with a short table or bullet summary.
 
 **Say:**
-So for Bobabricks, we have some training goals we want to meet this year, we want to make sure our employees are staying up to date with everything they should be doing. It's going to first query my Genie space here, so I didn't have to build out this UI, but you can customize it. Let me scroll down so we can see Pacific region, training hours, last 12 weeks. I can see I do have a store falling behind, it was able to reach out to Genie, run that query for me, and return and format that response.
+So for Bobabricks, we have some training goals we want to meet this year, we want to make sure our employees are staying up to date with everything they should be doing. It's going to first query my Genie Agent here, so I didn't have to build out this UI, but you can customize it. Let me scroll down so we can see Pacific region, training hours, last 12 weeks. I can see I do have a store falling behind, it was able to reach out to Genie, run that query for me, and return and format that response.
 
 ---
 

@@ -11,14 +11,14 @@ databricks auth login --host <workspace-url> --profile <profile-name>
 databricks auth profiles
 ```
 
-Use the workspace where the Bobabricks demo assets, Genie space, Unity AI Gateway endpoint, Databricks-App MCPs, and Databricks App should live. For this demo, prefer the `fevm-worldtour-ai` CLI profile.
+Use the workspace where the Bobabricks demo assets, Genie Agent, Unity AI Gateway endpoint, Databricks-App MCPs, and Databricks App should live. For this demo, prefer the `fevm-worldtour-ai` CLI profile.
 
 ## 2. Provision Required Workspace Assets
 
 Create or confirm these Databricks resources:
 
 - SQL warehouse for store operations data.
-- Genie space named `bobabricks_store_operations` or update `agent-store-ops/mcp_servers.yaml`.
+- Genie Agent named `bobabricks_store_operations` or update `agent-store-ops/mcp_servers.yaml`.
 - Unity AI Gateway endpoint named `bobabricks-store-ops` or update `agent-store-ops/agent.yaml`.
 - App budget or usage policy for the guardrail demo moment.
 - Databricks App MCP named `bobabricks-storetime-mcp` backed by demo Delta schedule/training tables.
@@ -37,7 +37,7 @@ Load the CSV/JSON files in `data/` into governed tables or demo-serving data loc
 - `data/ops_tasks.json`
 - `data/confluence_playbooks.json` for local-only rehearsal fallback
 
-For a live Genie demo, expose store metrics, training, customer experience, and first-pass inventory facts through tables that the Genie space can query. StoreTime and OpsTask should be real Databricks-App MCPs backed by demo Delta tables so the first pass has credible operational-tool integration without requiring external systems.
+For a live Genie demo, expose store metrics, training, customer experience, and first-pass inventory facts through tables that the Genie Agent can query. StoreTime and OpsTask should be real Databricks-App MCPs backed by demo Delta tables so the first pass has credible operational-tool integration without requiring external systems.
 
 ## 4. Configure External Context
 
