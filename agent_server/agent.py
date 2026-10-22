@@ -1,3 +1,4 @@
+import functools
 import json
 import logging
 import os
@@ -6,10 +7,11 @@ from contextlib import AsyncExitStack
 from datetime import datetime
 from pathlib import Path
 from typing import Any, AsyncGenerator
+from uuid import uuid4
 
 import httpx
 import mlflow
-from agents import Agent, FunctionTool, RunContextWrapper, Runner, function_tool, set_default_openai_api, set_default_openai_client
+from agents import Agent, FunctionTool, ModelSettings, RunContextWrapper, Runner, function_tool, set_default_openai_api, set_default_openai_client
 from agents.tracing import set_trace_processors
 from databricks.sdk import WorkspaceClient
 from databricks_openai import AsyncDatabricksOpenAI
@@ -153,11 +155,29 @@ Use the attached tools directly:
 - OpsTask for existing follow-up tickets and task tracking.
 - Confluence/Atlassian for FY26 goals, operating standards, and playbooks when Confluence is connected.
 
-Do not invent stores, metrics, targets, task ids, or policy. Keep demo answers
-natural: do not expose internal tool availability problems, missing-source
-diagnostics, or reconnect instructions unless the user explicitly asks about tool
-health. Lead with the answer, then cite the tool evidence compactly. Preserve
-markdown tables returned by tools for training-hour comparisons.
+Do not invent stores, metrics, targets, task ids, or policy. Every store number,
+store name, schedule fact, and task in an answer must come from a tool call made
+in this turn. Never answer store data from memory, from earlier turns, or from
+these instructions; if a question needs store data, call the tool even if you
+think you know the answer. Call read-only tools without asking the user first;
+only create/write tools need approval. If a Genie query returns "Query is still
+processing", call its poll_response tool with the returned conversation_id and
+message_id before answering, and keep polling until it returns data. Attribute
+every number only to the tool whose output contained it; when Genie and
+StoreTime report different numbers, show each with its own source instead of
+merging them. If the tool you need fails or is not attached this
+turn, say in one short line that that data source did not respond, and do not
+fill in the numbers. Otherwise keep demo answers natural: do not add
+missing-source diagnostics or reconnect instructions unless the user explicitly
+asks about tool health. Lead with the answer, then give the evidence
+compactly. Preserve markdown tables returned by tools for training-hour
+comparisons.
+Never put source tags in the answer: no bracketed tags such as "[Genie]" or
+"[StoreTime inspect_schedule]", no "— Genie Agent" suffixes, no "Evidence:
+Genie Agent ..." or "Evidence (StoreTime):" lines, and no tool or space names.
+The app adds the source line. When Genie and StoreTime return the same figure,
+state it once. Only if they disagree, show both values in one bullet, for
+example "42 scheduled hours (StoreTime) vs 40 (Genie)".
 
 When asked what tools you have, answer from the configured Bobabricks tool
 context in a clean demo style. Do not call a tool for this question. Do not use
@@ -202,49 +222,49 @@ Keep responses polished and easy to scan. Use the cleaner demo format:
   the tools; do not invent a stricter date window than the user asked for.
 - Interpret "average versus actual training hours" as scheduled/target training
   hours versus actual/completed training hours. Do not compare actual hours to
-  the regional average as the behind/on-track test. Use severity markers instead
-  of making every shortfall red: ✅ when completed hours meet scheduled/target
-  hours; ⚠️ for ordinary shortfalls/watch items; 🚩 only for the severe material
-  gap that needs immediate intervention. When the user asks to "flag any stores
-  falling behind," list only 🚩 stores as flagged and keep ⚠️ stores as watch
-  items.
-- For the Pacific 2026-W27 demo table, use this severity classification when
-  those rows are returned by the tools: Seattle Capitol Hill (101) ✅; Bellevue
-  Commons (102) ⚠️; Tacoma Narrows (103) ⚠️; Seattle Pike Place (104) 🚩;
-  Portland Pearl (117) ⚠️; San Francisco Market (122) ✅; San Diego Harbor
-  (130) ⚠️.
+  the regional average as the behind/on-track test. Assign each store's marker
+  from completed hours divided by scheduled/target hours, using exactly these
+  bands: 95% or more is ✅ on track (so 39 of 40 is ✅); 80% to under 95% is ⚠️
+  watch (so 37 of 40 is ⚠️); under 80% is 🚩 behind (so 28 of 42 is 🚩). Stores
+  with the same hours always get the same marker. When the user asks to "flag
+  any stores falling behind," list only 🚩 stores as flagged.
 - For the question "Show average versus actual training hours for my Pacific
   stores and flag any stores falling behind", keep the visible answer short:
-  one summary sentence, then a table with at most 5 stores. Put Seattle Pike
-  Place (104) 🚩 first. Show up to 4 additional on-track green examples only
-  when available. Do not include a Notes section, root-cause analysis, next steps,
-  "if you want" offers, or mention empty StoreTime results. Use the source line
-  "Source: bobabricks_store_operations."
+  one summary sentence, then one table with every Pacific store returned, one
+  row per store, ordered 🚩 first, then ⚠️, then ✅. Columns: Store, Scheduled
+  hrs, Completed hrs, Status. Nothing after the table: no "Flagged store",
+  "Also in range", or "Watch" lists repeating table rows, no Notes section,
+  root-cause analysis, next steps, "if you want" offers, or mention of empty
+  StoreTime results.
 - For Store 104 "why", "behind", or "falling behind" training questions in the
   upgraded state, use Confluence for the company goal/standard first, then use
   StoreTime for schedule/training evidence and Genie when available for the
   completion readout. The complete answer is the comparison: company standard
-  from Confluence plus Store 104's evidence that 42 scheduled training hours
-  became 28 completed hours after 14 hours were converted to rush-window service
-  coverage, with an 81.8% training completion readout when returned by Genie.
+  from Confluence plus Store 104's scheduled, completed, and converted training
+  hours as returned by StoreTime, and its training completion readout as
+  returned by Genie.
 - For FY26 goals, company training goals, operating standards, or playbook
   questions, use Confluence for the goal/policy context. Then compare those
   goals to Store 104's Genie and StoreTime evidence. If Confluence is not
   connected, you have no source for the company goal: do not state, paraphrase,
   summarize, or infer any FY26 goal, target, percentage, or operating standard,
   not even a generic one such as "complete scheduled training as planned" or
-  "keep conversion to coverage minimal". Answer the operational part only, with
+  "keep conversion to coverage minimal". Genie and StoreTime hold store
+  metrics, not company goals: ask Genie only for Store 104's metrics, and never
+  present a company-wide total or average as an FY26 goal, readout, benchmark,
+  or standard, or say Store 104 is behind one. Answer the operational part only, with
   Store 104's status framed against its own schedule evidence rather than
   against a goal, and add one short caveat after the evidence: "I don't have the
   official company training goal connected yet."
   Do not make missing company context the headline. Do not claim Store 104 data
   is missing. Do not write "Short answer", "What's missing", "What I do have",
   "share the FY26 goals", "reconnect Confluence", or phrases like "I'm
-  answering from Genie and StoreTime data only". Keep source attribution only in
-  the final source line.
+  answering from Genie and StoreTime data only".
 - For the final demo question "What are our FY26 training goals, and how does
-  Store 104 stack up?", do not include a recommendation or next step unless the
-  user asks for one. When Confluence is connected, use this structure: one
+  Store 104 stack up?", always call Genie and StoreTime for Store 104 before
+  answering, whether or not Confluence is connected. Read-only tools never need
+  the user's permission: never ask whether to fetch data, just fetch it. Do not
+  include a recommendation or next step unless the user asks for one. When Confluence is connected, use this structure: one
   sentence with the goal and Store 104 status, then 2-3 bullets with the
   evidence. When Confluence is not connected, the opening sentence states
   Store 104's training status only and names no goal.
@@ -268,12 +288,8 @@ Keep responses polished and easy to scan. Use the cleaner demo format:
   the user explicitly asks to create a follow-up task.
 - Keep follow-up explanation to 2-4 bullets. Avoid long missing-source sections
   unless the user explicitly asks why a tool failed.
-- End with a short source line such as "Sources: Genie, StoreTime." Add
-  Confluence only after the Atlassian tools are connected and used. When
-  Confluence was used, make it a clickable markdown link to the page you
-  grounded on, for example "Sources: [Confluence — FY26 Store Operations Goals
-  & Operating Standards](https://example.atlassian.net/wiki/...), Genie,
-  StoreTime."
+- Do not write a "Source:" or "Sources:" line yourself. The app appends one
+  after your answer, built from the tools that actually ran this turn.
   Do not expose raw table names, MCP tool ids, or generated tool names unless the
   user explicitly asks for technical details.
 """
@@ -288,13 +304,9 @@ For any user question containing "FY26", "training goals", "company goals",
 training", "what should I do", "recommended next steps", "next steps", or
 "why is Store 104 behind", call the Confluence tool before answering. For action
 or next-step questions about Store 104, also call StoreTime before answering so
-the recommendation is grounded in the current schedule/conversion context. The
-answer must include Confluence in the final source line when that tool was
-called and StoreTime when StoreTime was called. Cite Confluence as a clickable
-markdown link whose target is the `url` of a `citations` entry returned by
-search_confluence, and whose text is "Confluence — " plus that page title. Copy
-the url from the tool result exactly; if the result carries no url, write plain
-"Confluence" rather than inventing or guessing a link.
+the recommendation is grounded in the current schedule/conversion context. Do
+not write a source line or Confluence link yourself; the app appends the
+Confluence page link from the search_confluence result.
 When asked what tools you have, the app is now in the upgraded Confluence state.
 Answer with exactly these four rows in one compact markdown table:
 - Tool Genie Agent; Name bobabricks_store_operations; Contains governed store
@@ -617,7 +629,9 @@ async def build_atlassian_tools(stack: AsyncExitStack) -> tuple[list[FunctionToo
         return [], [ATLASSIAN_FRIENDLY_NAME]
 
 
-async def build_direct_databricks_mcp_tools(stack: AsyncExitStack) -> tuple[list[FunctionTool], list[str]]:
+async def build_direct_databricks_mcp_tools(
+    stack: AsyncExitStack, tool_sources: dict[str, str] | None = None
+) -> tuple[list[FunctionTool], list[str]]:
     if os.getenv("DISABLE_MCP_SERVERS", "false").strip().lower() in {"1", "true", "on", "yes"}:
         return [], list(MCP_FRIENDLY_NAMES.values())
     token = _databricks_mcp_token()
@@ -634,7 +648,10 @@ async def build_direct_databricks_mcp_tools(stack: AsyncExitStack) -> tuple[list
             continue
         try:
             client = await stack.enter_async_context(DirectMcpClient(url, token))
-            tools.extend(_make_function_tool(client, meta) for meta in await client.list_tools())
+            metas = await client.list_tools()
+            tools.extend(_make_function_tool(client, meta) for meta in metas)
+            if tool_sources is not None:
+                tool_sources.update({meta["name"]: SOURCE_LABELS[name] for meta in metas})
         except Exception as exc:
             logger.warning("MCP server %r unavailable over direct transport; running without it. (%s)", name, exc)
             unavailable.append(MCP_FRIENDLY_NAMES.get(name, name))
@@ -660,8 +677,40 @@ MCP_FRIENDLY_NAMES = {
     "opstask": "OpsTask",
 }
 
+# Labels for the user-visible "Sources:" line, keyed by MCP server name.
+SOURCE_LABELS = {
+    "bobabricks_genie": "Genie Agent",
+    "storetime": "StoreTime",
+    "opstask": "OpsTask",
+}
+CONFLUENCE_SOURCE_LABEL = "Confluence"
+STORETIME_APP_NAME = os.getenv("STORETIME_APP_NAME", "bobabricks-storetime-mcp")
+OPSTASK_APP_NAME = os.getenv("OPSTASK_APP_NAME", "bobabricks-opstask-mcp")
 
-async def connect_available_mcp_servers(stack: AsyncExitStack, workspace_client: WorkspaceClient):
+
+@functools.lru_cache(maxsize=1)
+def _source_urls() -> dict[str, str]:
+    """Workspace pages a viewer can open to inspect each source."""
+    host = get_databricks_host_from_env()
+    return {
+        "Genie Agent": f"{host}/genie/rooms/{GENIE_SPACE_ID}",
+        "StoreTime": f"{host}/apps/{STORETIME_APP_NAME}",
+        "OpsTask": f"{host}/apps/{OPSTASK_APP_NAME}",
+    }
+
+
+def _source_link(label: str) -> str:
+    try:
+        url = _source_urls().get(label)
+    except Exception:
+        url = None
+    return f"[{label}]({url})" if url else label
+CONFLUENCE_FIXTURE_SOURCE_LABEL = "Sample playbooks (offline, not live Confluence)"
+
+
+async def connect_available_mcp_servers(
+    stack: AsyncExitStack, workspace_client: WorkspaceClient, tool_sources: dict[str, str] | None = None
+):
     available = []
     unavailable = []
     if os.getenv("DISABLE_MCP_SERVERS", "false").strip().lower() in {"1", "true", "on", "yes"}:
@@ -670,8 +719,11 @@ async def connect_available_mcp_servers(stack: AsyncExitStack, workspace_client:
         name = getattr(server, "name", "tool")
         try:
             connected = await stack.enter_async_context(server)
-            await connected.list_tools()
+            listed = await connected.list_tools()
             available.append(connected)
+            if tool_sources is not None:
+                label = SOURCE_LABELS.get(name, MCP_FRIENDLY_NAMES.get(name, name))
+                tool_sources.update({tool.name: label for tool in listed})
         except Exception as exc:
             logger.warning("MCP server %r unavailable; running without it. (%s)", name, exc)
             unavailable.append(MCP_FRIENDLY_NAMES.get(name, name))
@@ -685,7 +737,86 @@ async def close_tool_stack(stack: AsyncExitStack) -> None:
         logger.warning("MCP cleanup failed after response generation. (%s)", exc, exc_info=True)
 
 
-def create_agent(mcp_servers=None, unavailable_tools=None, extra_tools=None, context_tools_enabled: bool = False) -> Agent:
+def _raw_field(raw: Any, key: str) -> Any:
+    return raw.get(key) if isinstance(raw, dict) else getattr(raw, key, None)
+
+
+def _is_tool_error(output: str) -> bool:
+    text = output.lstrip()
+    if text.startswith(("Tool error", "An error occurred")):
+        return True
+    # A Genie query that is still running has returned no data yet; only its
+    # completed poll_response counts as a Genie source.
+    if "Query is still processing" in text:
+        return True
+    try:
+        parsed = json.loads(text)
+    except Exception:
+        return False
+    return isinstance(parsed, dict) and set(parsed) == {"error"}
+
+
+def _confluence_links(output: str) -> list[str]:
+    try:
+        citations = json.loads(output).get("citations") or []
+    except Exception:
+        return []
+    links = []
+    for citation in citations:
+        url = str(citation.get("url", "")).strip()
+        title = str(citation.get("title", "")).strip() or "page"
+        if url.startswith("https://"):
+            links.append(f"[{CONFLUENCE_SOURCE_LABEL}: {title}]({url})")
+    return links
+
+
+def build_sources_line(items: list[Any], tool_sources: dict[str, str]) -> str:
+    """Name only the sources whose tools actually returned a result this turn."""
+    called = {}
+    for item in items:
+        if getattr(item, "type", None) == "tool_call_item":
+            name = _raw_field(item.raw_item, "name")
+            if name in tool_sources:
+                called[_raw_field(item.raw_item, "call_id")] = name
+    labels: list[str] = []
+    for item in items:
+        if getattr(item, "type", None) != "tool_call_output_item":
+            continue
+        name = called.get(_raw_field(item.raw_item, "call_id"))
+        output = str(getattr(item, "output", ""))
+        if not name or _is_tool_error(output):
+            continue
+        label = tool_sources[name]
+        found = (_confluence_links(output) or [label]) if label == CONFLUENCE_SOURCE_LABEL else [_source_link(label)]
+        labels.extend(entry for entry in found if entry not in labels)
+    return f"Sources: {', '.join(labels)}" if labels else ""
+
+
+def _sources_stream_events(text: str) -> list[dict[str, Any]]:
+    # The chat UI joins consecutive assistant text, so start on its own paragraph.
+    text = f"\n\n{text}"
+    item_id = f"msg_{uuid4().hex}"
+    return [
+        {"type": "response.output_text.delta", "item_id": item_id, "delta": text},
+        {
+            "type": "response.output_item.done",
+            "item": {
+                "type": "message",
+                "id": item_id,
+                "role": "assistant",
+                "content": [{"type": "output_text", "text": text, "annotations": []}],
+            },
+        },
+    ]
+
+
+def create_agent(
+    mcp_servers=None,
+    unavailable_tools=None,
+    extra_tools=None,
+    context_tools_enabled: bool = False,
+    require_tool_call: bool = False,
+) -> Agent:
     instructions = AGENT_INSTRUCTIONS
     if context_tools_enabled:
         instructions += CONTEXT_INSTRUCTIONS
@@ -696,6 +827,19 @@ def create_agent(mcp_servers=None, unavailable_tools=None, extra_tools=None, con
             f"Some capabilities may be unavailable this turn: {names}. Treat this as internal runtime context. "
             "Do not mention it in the user-visible answer unless the user explicitly asks about tool health."
         )
+    # When the question needs store data, force the first model step to call a
+    # tool so it cannot answer from earlier turns. The SDK resets tool_choice to
+    # auto after that call. get_current_time is dropped so it cannot satisfy the
+    # requirement in place of a data tool.
+    if require_tool_call:
+        return Agent(
+            name="Bobabricks Store Operations Agent",
+            instructions=instructions,
+            model=MODEL,
+            tools=list(extra_tools or []),
+            mcp_servers=mcp_servers or [],
+            model_settings=ModelSettings(tool_choice="required"),
+        )
     return Agent(
         name="Bobabricks Store Operations Agent",
         instructions=instructions,
@@ -703,6 +847,51 @@ def create_agent(mcp_servers=None, unavailable_tools=None, extra_tools=None, con
         tools=[get_current_time, *(extra_tools or [])],
         mcp_servers=mcp_servers or [],
     )
+
+
+# Questions about store data must hit a tool; "What tools do you have?" must not.
+STORE_DATA_PATTERN = re.compile(
+    r"\b(stores?|training|hours|fy26|goals?|behind|stack up|pacific|region(al)?|schedules?|"
+    r"coverage|completion|tasks?|follow-?ups?|playbooks?|standards?|next steps?|do next|should i do)\b",
+    re.IGNORECASE,
+)
+TOOLS_QUESTION_PATTERN = re.compile(r"\bwhat tools\b", re.IGNORECASE)
+
+
+def needs_store_data(request: ResponsesAgentRequest) -> bool:
+    user_texts = [
+        _item_text(item)
+        for item in request.input
+        if (item.model_dump() if hasattr(item, "model_dump") else item).get("role") == "user"
+    ]
+    text = user_texts[-1] if user_texts else ""
+    return bool(STORE_DATA_PATTERN.search(text)) and not TOOLS_QUESTION_PATTERN.search(text)
+
+
+async def build_request_agent(
+    stack: AsyncExitStack, require_tool_call: bool = False
+) -> tuple[Agent, dict[str, str]]:
+    """Connect this turn's tools and record which source each tool name belongs to."""
+    tool_sources: dict[str, str] = {}
+    mcp_servers, unavailable_tools = await connect_available_mcp_servers(stack, WorkspaceClient(), tool_sources)
+    direct_tools, direct_unavailable = await build_direct_databricks_mcp_tools(stack, tool_sources)
+    atlassian_tools, atlassian_unavailable = await build_atlassian_tools(stack)
+    context_tools = list(atlassian_tools)
+    tool_sources.update({tool.name: CONFLUENCE_SOURCE_LABEL for tool in atlassian_tools})
+    unavailable = unavailable_tools + direct_unavailable
+    if CONFLUENCE_MCP_ENABLED and not atlassian_tools:
+        context_tools.append(search_confluence)
+        tool_sources[search_confluence.name] = CONFLUENCE_FIXTURE_SOURCE_LABEL
+    else:
+        unavailable += atlassian_unavailable
+    agent = create_agent(
+        mcp_servers=mcp_servers,
+        unavailable_tools=unavailable,
+        extra_tools=direct_tools + context_tools,
+        context_tools_enabled=CONFLUENCE_MCP_ENABLED,
+        require_tool_call=require_tool_call and bool(mcp_servers or direct_tools or context_tools),
+    )
+    return agent, tool_sources
 
 
 def maybe_create_session(session_id: str) -> AsyncDatabricksSession | None:
@@ -767,27 +956,17 @@ async def invoke_handler(request: ResponsesAgentRequest) -> ResponsesAgentRespon
         stack = AsyncExitStack()
         await stack.__aenter__()
         try:
-            mcp_servers, unavailable_tools = await connect_available_mcp_servers(stack, WorkspaceClient())
-            direct_tools, direct_unavailable = await build_direct_databricks_mcp_tools(stack)
-            atlassian_tools, atlassian_unavailable = await build_atlassian_tools(stack)
-            context_tools = list(atlassian_tools)
-            unavailable = unavailable_tools + direct_unavailable
-            if CONFLUENCE_MCP_ENABLED and not atlassian_tools:
-                context_tools.append(search_confluence)
-            else:
-                unavailable += atlassian_unavailable
-            agent = create_agent(
-                mcp_servers=mcp_servers,
-                unavailable_tools=unavailable,
-                extra_tools=direct_tools + context_tools,
-                context_tools_enabled=CONFLUENCE_MCP_ENABLED,
-            )
+            agent, tool_sources = await build_request_agent(stack, needs_store_data(request))
             result = await Runner.run(agent, await deduplicate_input(request, session), session=session)
         finally:
             await close_tool_stack(stack)
 
+        output = [item.to_input_item() for item in result.new_items]
+        sources = build_sources_line(result.new_items, tool_sources)
+        if sources:
+            output.append(_sources_stream_events(sources)[1]["item"])
         return ResponsesAgentResponse(
-            output=[item.to_input_item() for item in result.new_items],
+            output=output,
             custom_outputs={"session_id": session.session_id if session else session_id},
         )
     except Exception as exc:
@@ -813,24 +992,14 @@ async def stream_handler(request: ResponsesAgentRequest) -> AsyncGenerator[Respo
         stack = AsyncExitStack()
         await stack.__aenter__()
         try:
-            mcp_servers, unavailable_tools = await connect_available_mcp_servers(stack, WorkspaceClient())
-            direct_tools, direct_unavailable = await build_direct_databricks_mcp_tools(stack)
-            atlassian_tools, atlassian_unavailable = await build_atlassian_tools(stack)
-            context_tools = list(atlassian_tools)
-            unavailable = unavailable_tools + direct_unavailable
-            if CONFLUENCE_MCP_ENABLED and not atlassian_tools:
-                context_tools.append(search_confluence)
-            else:
-                unavailable += atlassian_unavailable
-            agent = create_agent(
-                mcp_servers=mcp_servers,
-                unavailable_tools=unavailable,
-                extra_tools=direct_tools + context_tools,
-                context_tools_enabled=CONFLUENCE_MCP_ENABLED,
-            )
+            agent, tool_sources = await build_request_agent(stack, needs_store_data(request))
             result = Runner.run_streamed(agent, input=await deduplicate_input(request, session), session=session)
             async for event in process_agent_stream_events(result.stream_events()):
                 yield event
+            sources = build_sources_line(result.new_items, tool_sources)
+            if sources:
+                for event in _sources_stream_events(sources):
+                    yield event
         finally:
             await close_tool_stack(stack)
     except Exception as exc:
