@@ -38,11 +38,15 @@ destination — substitute your own login email for `<your-email>` (do not
 hardcode another user's home folder):
 
 ```bash
-databricks sync --profile fevm-worldtour-ai . /Workspace/Users/<your-email>/WT26_AIbreakout
+databricks sync --full --profile fevm-worldtour-ai . /Workspace/Users/<your-email>/WT26_AIbreakout
 databricks apps deploy bobabricks-store-ops-demo \
   --profile fevm-worldtour-ai \
   --source-code-path /Workspace/Users/<your-email>/WT26_AIbreakout
 ```
+
+Use `--full`. A plain `databricks sync` can print "Initial Sync Complete" while
+uploading nothing, in which case the deploy ships the previous `app.yaml` and
+Confluence stays off even though the deploy reports SUCCEEDED.
 
 Deployment guardrails:
 
@@ -50,5 +54,9 @@ Deployment guardrails:
 - Do not run `databricks apps deploy --auto-approve`.
 - Always deploy the app named `bobabricks-store-ops-demo`.
 - Deploy from the synced workspace folder path, not `--source-code-path .`.
-- Check deployment status after redeploying.
+- Check deployment status after redeploying, then confirm the new config actually
+  shipped: export `app.yaml` from the deployment snapshot path
+  (`/Workspace/Users/<app-service-principal-id>/src/<deployment_id>/app.yaml`) and
+  check it contains `CONFLUENCE_MCP_ENABLED`. A SUCCEEDED status alone does not
+  prove the upgrade shipped.
 - Do not read app logs unless deployment fails or the app does not start.

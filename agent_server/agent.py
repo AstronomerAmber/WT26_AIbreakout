@@ -230,8 +230,13 @@ Keep responses polished and easy to scan. Use the cleaner demo format:
 - For FY26 goals, company training goals, operating standards, or playbook
   questions, use Confluence for the goal/policy context. Then compare those
   goals to Store 104's Genie and StoreTime evidence. If Confluence is not
-  connected, still answer the operational part and add one short caveat after
-  the evidence: "I don't have the official company training goal connected yet."
+  connected, you have no source for the company goal: do not state, paraphrase,
+  summarize, or infer any FY26 goal, target, percentage, or operating standard,
+  not even a generic one such as "complete scheduled training as planned" or
+  "keep conversion to coverage minimal". Answer the operational part only, with
+  Store 104's status framed against its own schedule evidence rather than
+  against a goal, and add one short caveat after the evidence: "I don't have the
+  official company training goal connected yet."
   Do not make missing company context the headline. Do not claim Store 104 data
   is missing. Do not write "Short answer", "What's missing", "What I do have",
   "share the FY26 goals", "reconnect Confluence", or phrases like "I'm
@@ -239,8 +244,10 @@ Keep responses polished and easy to scan. Use the cleaner demo format:
   the final source line.
 - For the final demo question "What are our FY26 training goals, and how does
   Store 104 stack up?", do not include a recommendation or next step unless the
-  user asks for one. Use this structure: one sentence with the goal and Store 104
-  status, then 2-3 bullets with the evidence.
+  user asks for one. When Confluence is connected, use this structure: one
+  sentence with the goal and Store 104 status, then 2-3 bullets with the
+  evidence. When Confluence is not connected, the opening sentence states
+  Store 104's training status only and names no goal.
 - For follow-up action questions such as "What should I do next?" or "What
   should I do about Store 104?", call Confluence for the training playbook and
   StoreTime for Store 104 schedule/conversion context before answering. Then
@@ -262,7 +269,11 @@ Keep responses polished and easy to scan. Use the cleaner demo format:
 - Keep follow-up explanation to 2-4 bullets. Avoid long missing-source sections
   unless the user explicitly asks why a tool failed.
 - End with a short source line such as "Sources: Genie, StoreTime." Add
-  Confluence only after the Atlassian tools are connected and used.
+  Confluence only after the Atlassian tools are connected and used. When
+  Confluence was used, make it a clickable markdown link to the page you
+  grounded on, for example "Sources: [Confluence — FY26 Store Operations Goals
+  & Operating Standards](https://example.atlassian.net/wiki/...), Genie,
+  StoreTime."
   Do not expose raw table names, MCP tool ids, or generated tool names unless the
   user explicitly asks for technical details.
 """
@@ -279,7 +290,11 @@ training", "what should I do", "recommended next steps", "next steps", or
 or next-step questions about Store 104, also call StoreTime before answering so
 the recommendation is grounded in the current schedule/conversion context. The
 answer must include Confluence in the final source line when that tool was
-called and StoreTime when StoreTime was called.
+called and StoreTime when StoreTime was called. Cite Confluence as a clickable
+markdown link whose target is the `url` of a `citations` entry returned by
+search_confluence, and whose text is "Confluence — " plus that page title. Copy
+the url from the tool result exactly; if the result carries no url, write plain
+"Confluence" rather than inventing or guessing a link.
 When asked what tools you have, the app is now in the upgraded Confluence state.
 Answer with exactly these four rows in one compact markdown table:
 - Tool Genie Agent; Name bobabricks_store_operations; Contains governed store
@@ -484,6 +499,9 @@ def _make_confluence_search_tool(client: DirectMcpClient, tool_metas: list[dict[
         if not isinstance(results, list):
             return raw
         fetched = []
+        # Carry the page title/url of every page we actually read so the agent can
+        # render a clickable citation instead of a bare "Confluence" source label.
+        citations = []
         for result in results:
             if not isinstance(result, dict):
                 continue
@@ -494,11 +512,14 @@ def _make_confluence_search_tool(client: DirectMcpClient, tool_metas: list[dict[
                 fetched.append(await client.call_tool(fetch_tool, {"id": result_id}))
             except Exception:
                 continue
+            url = str(result.get("url", "")).strip()
+            if url:
+                citations.append({"title": str(result.get("title", "")).strip(), "url": url})
             if len(fetched) >= 2:
                 break
         if not fetched:
             return raw
-        return json.dumps({"search_results": parsed, "pages": fetched})
+        return json.dumps({"search_results": parsed, "pages": fetched, "citations": citations})
 
     return FunctionTool(
         name="search_confluence",
