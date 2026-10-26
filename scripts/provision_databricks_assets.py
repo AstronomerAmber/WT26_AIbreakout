@@ -119,18 +119,25 @@ def build_seed_data() -> dict[str, tuple[list[str], list[tuple]]]:
             wait = random.uniform(3.8, 5.8)
             csat = random.uniform(4.2, 4.8)
             converted_training_hours = random.choice([0, 0, 1, 2, 3])
+            scheduled_training_hours = 40
             if store_id == 104:
                 training_completion = 79 + week_offset * 0.4
                 wait = 6.4 + random.uniform(0.1, 0.7)
                 converted_training_hours = 12 + week_offset % 4
                 sales_factor = 0.96
+                if week_offset == 7:
+                    # Demo week (2026-W27): must match the schedules/training_events
+                    # rows below and script.md — 42 scheduled, 28 completed, 14 converted.
+                    scheduled_training_hours = 42
+                    converted_training_hours = 14
+                    training_completion = 28 / 42 * 100
             if store_id == 117:
                 sales_factor = 0.935
                 wait = 5.2
             if store_id == 122:
                 wait = 8.1 + random.uniform(0, 0.5)
                 csat = 3.75 + random.uniform(0, 0.2)
-            weekly_metrics.append((store_id, week, region, round(target * sales_factor, 2), target, round((sales_factor - 1) * 100, 2), round(training_completion, 1), round(wait, 1), round(csat, 2), 40, round(40 - converted_training_hours, 1), converted_training_hours, "rush window service coverage" if converted_training_hours else None))
+            weekly_metrics.append((store_id, week, region, round(target * sales_factor, 2), target, round((sales_factor - 1) * 100, 2), round(training_completion, 1), round(wait, 1), round(csat, 2), scheduled_training_hours, round(scheduled_training_hours - converted_training_hours, 1), converted_training_hours, "rush window service coverage" if converted_training_hours else None))
 
     schedules = []
     shifts = []
