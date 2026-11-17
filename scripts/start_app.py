@@ -46,7 +46,7 @@ function BobabricksResourcePanel() {
     <div className="px-3 pt-4 text-sidebar-foreground group-data-[collapsible=icon]:hidden">
       <section className="rounded-md border border-sidebar-border/70 bg-sidebar-accent/30 px-3 py-2.5">
         <div className="px-1 text-xs font-medium uppercase text-muted-foreground">
-          Lakebase
+          Powered by Agent Memory on Lakebase
         </div>
         <div className="px-1 text-sm">
           <div className="flex items-center gap-2 font-medium">
