@@ -46,7 +46,7 @@ function BobabricksResourcePanel() {
     <div className="px-3 pt-4 text-sidebar-foreground group-data-[collapsible=icon]:hidden">
       <section className="rounded-md border border-sidebar-border/70 bg-sidebar-accent/30 px-3 py-2.5">
         <div className="px-1 text-xs font-medium uppercase text-muted-foreground">
-          Powered by Agent Memory on Lakebase
+          Lakebase
         </div>
         <div className="px-1 text-sm">
           <div className="flex items-center gap-2 font-medium">
@@ -54,7 +54,7 @@ function BobabricksResourcePanel() {
             <span>bobabricks</span>
           </div>
           <div className="mt-0.5 text-xs leading-5 text-muted-foreground">
-            Regional preference and demo session memory
+            Sessions saved each turn, distilled into long-term memory
           </div>
         </div>
       </section>
@@ -234,7 +234,7 @@ export const Greeting = () => {
         className="space-y-2"
       >
         <div className="text-2xl font-semibold md:text-3xl">Welcome to Bobabricks</div>
-        <div className="text-sm font-medium text-muted-foreground">Powered by Databricks</div>
+        <div className="text-sm font-medium text-muted-foreground">Powered by Databricks · Agent Memory on Lakebase</div>
       </motion.div>
     </div>
   );
