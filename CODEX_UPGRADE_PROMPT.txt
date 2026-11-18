@@ -3,14 +3,15 @@ For the Bobabricks store operations agent, add our FY26 goals and store playbook
 Please:
 1. Add the managed Atlassian Confluence MCP to `agent-store-ops/mcp_servers.yaml` so the agent can pull FY26 goals and store operating playbooks directly from Confluence.
 2. Add exactly one new tool in `agent-store-ops/tools.yaml`: `search_confluence`, backed by the new Confluence MCP.
-3. Add the app env needed to enable the connector: `CONFLUENCE_MCP_ENABLED=true` and `ATLASSIAN_MCP_URL`.
+3. Add the app env needed to enable the connector: `CONFLUENCE_MCP_ENABLED=true` and `ATLASSIAN_MCP_URL`
+   (`https://data-ai-lakehouse.cloud.databricks.com/api/2.0/mcp/external/system_ai_agent_atlassian_mcp`).
+   Add them to the WORKSPACE copies of app.yaml/app.yml, not the repo copies (the repo copies hold
+   fevm values); see AGENTS.md → Deployment.
 4. Preserve the existing baseline capabilities (Genie, StoreTime, OpsTask, and Lakebase sidebar context) exactly as they are.
 5. Before redeploying, stop and ask for explicit approval with this wording: `Approve redeploying bobabricks-store-ops-demo with the Confluence upgrade?`
-6. Redeploy the app only after approval. The edits above are uncommitted working-tree
-   changes, so they must be synced to the workspace first — substitute your own login
-   email for `<your-email>` and run both commands from the repo root:
-   `databricks sync --full . /Workspace/Users/<your-email>/WT26_AIbreakout --profile fevm-worldtour-ai`
-   `databricks apps deploy bobabricks-store-ops-demo --source-code-path /Workspace/Users/<your-email>/WT26_AIbreakout --profile fevm-worldtour-ai`
+6. Redeploy the app only after approval, following the five steps in AGENTS.md → Deployment
+   exactly (export workspace manifests, add the two env vars, `sync --full`, re-import the
+   manifests, deploy with `-p DEFAULT`). Substitute your own login email for `<your-email>`.
 7. After redeploying, check deployment status, then confirm the new config actually
    shipped by exporting `app.yaml` from the deployment snapshot path
    (`/Workspace/Users/<app-service-principal-id>/src/<deployment_id>/app.yaml`) and
@@ -27,7 +28,7 @@ Deployment guardrails:
 - Use `databricks sync --full`; a plain `sync` can report "Initial Sync Complete" while
   uploading nothing.
 - Do not deploy the `app/` directory; this demo deploys the repo-root chat app defined by root `app.yml` / `app.yaml`.
-- Use profile `fevm-worldtour-ai`, not `DEFAULT`.
+- Use profile `DEFAULT` (data-ai-lakehouse). Never deploy the repo's own app.yaml/app.yml there.
 
 After changes, show:
 - the key diff summary (managed Atlassian/Confluence MCP added, one `search_confluence` tool added, app env enabled),
