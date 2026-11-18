@@ -5,13 +5,11 @@ Please:
 2. Add exactly one new tool in `agent-store-ops/tools.yaml`: `search_confluence`, backed by the new Confluence MCP.
 3. Add the app env needed to enable the connector: `CONFLUENCE_MCP_ENABLED=true` and `ATLASSIAN_MCP_URL`
    (`https://data-ai-lakehouse.cloud.databricks.com/api/2.0/mcp/external/system_ai_agent_atlassian_mcp`).
-   Add them to the WORKSPACE copies of app.yaml/app.yml, not the repo copies (the repo copies hold
-   fevm values); see AGENTS.md → Deployment.
+   Add them to both root app.yaml and app.yml.
 4. Preserve the existing baseline capabilities (Genie, StoreTime, OpsTask, and Lakebase sidebar context) exactly as they are.
 5. Before redeploying, stop and ask for explicit approval with this wording: `Approve redeploying bobabricks-store-ops-demo with the Confluence upgrade?`
-6. Redeploy the app only after approval, following the five steps in AGENTS.md → Deployment
-   exactly (export workspace manifests, add the two env vars, `sync --full`, re-import the
-   manifests, deploy with `-p DEFAULT`). Substitute your own login email for `<your-email>`.
+6. Redeploy the app only after approval, following AGENTS.md → Deployment
+   (`sync --full`, then deploy, both with `-p DEFAULT`). Substitute your own login email for `<your-email>`.
 7. After redeploying, check deployment status, then confirm the new config actually
    shipped by exporting `app.yaml` from the deployment snapshot path
    (`/Workspace/Users/<app-service-principal-id>/src/<deployment_id>/app.yaml`) and
@@ -28,7 +26,7 @@ Deployment guardrails:
 - Use `databricks sync --full`; a plain `sync` can report "Initial Sync Complete" while
   uploading nothing.
 - Do not deploy the `app/` directory; this demo deploys the repo-root chat app defined by root `app.yml` / `app.yaml`.
-- Use profile `DEFAULT` (data-ai-lakehouse). Never deploy the repo's own app.yaml/app.yml there.
+- Use profile `DEFAULT` (data-ai-lakehouse).
 
 After changes, show:
 - the key diff summary (managed Atlassian/Confluence MCP added, one `search_confluence` tool added, app env enabled),

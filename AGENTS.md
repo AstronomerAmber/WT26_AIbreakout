@@ -6,11 +6,7 @@ These instructions apply to this repository. The live demo runs in the
 `DEFAULT`. (Locally, `data-ai-lakehouse` is the same workspace; in a Databricks
 sandbox only `DEFAULT` exists.)
 
-IMPORTANT: the root `app.yaml` / `app.yml` committed in this repo contain
-**fevm-worldtour-ai** values (warehouse, catalog, MCP URLs). They are wrong for
-data-ai-lakehouse and must never be deployed there. The correct data-ai-lakehouse
-manifests are the ones already in the workspace folder; always start from those
-(see Deployment below).
+The root `app.yaml` / `app.yml` hold the data-ai-lakehouse values. Edit them directly.
 
 ## Adding Confluence Context
 
@@ -22,8 +18,7 @@ Give the agent Confluence context by making only this small, scoped change:
 
 - Add the managed Atlassian/Confluence MCP to `agent-store-ops/mcp_servers.yaml`.
 - Add exactly one new tool to `agent-store-ops/tools.yaml`: `search_confluence`.
-- Enable the connector in the app manifests by adding exactly these two env vars
-  (to the workspace manifests, as described in Deployment — not the repo copies):
+- Enable the connector by adding exactly these two env vars to BOTH root `app.yaml` and `app.yml`:
   - `CONFLUENCE_MCP_ENABLED` = `"true"`
   - `ATLASSIAN_MCP_URL` = `https://data-ai-lakehouse.cloud.databricks.com/api/2.0/mcp/external/system_ai_agent_atlassian_mcp`
 - Preserve the existing baseline capabilities: Genie, StoreTime, OpsTask, and Lakebase sidebar/session context.
@@ -43,28 +38,13 @@ Before redeploying, ask:
 Approve redeploying bobabricks-store-ops-demo with the Confluence upgrade?
 ```
 
-After approval, run these steps from the repo root. Substitute your own login
-email for `<your-email>` (do not hardcode another user's home folder).
+After approval, run these two commands from the repo root. Substitute your own
+login email for `<your-email>` (do not hardcode another user's home folder).
 
 ```bash
-WS=/Workspace/Users/<your-email>/WT26_AIbreakout
-
-# 1. Save the correct data-ai-lakehouse manifests BEFORE syncing (sync overwrites them).
-databricks workspace export $WS/app.yaml --format AUTO --file /tmp/dal-app.yaml -p DEFAULT
-databricks workspace export $WS/app.yml  --format AUTO --file /tmp/dal-app.yml  -p DEFAULT
-
-# 2. Add ONLY the two Confluence env vars (above) to /tmp/dal-app.yaml and /tmp/dal-app.yml.
-#    Change nothing else in them.
-
-# 3. Sync the code changes (mcp_servers.yaml, tools.yaml).
-databricks sync --full . $WS -p DEFAULT
-
-# 4. Put the data-ai-lakehouse manifests back over the synced fevm ones.
-databricks workspace import $WS/app.yaml --file /tmp/dal-app.yaml --format RAW --overwrite -p DEFAULT
-databricks workspace import $WS/app.yml  --file /tmp/dal-app.yml  --format RAW --overwrite -p DEFAULT
-
-# 5. Deploy.
-databricks apps deploy bobabricks-store-ops-demo -p DEFAULT --source-code-path $WS
+databricks sync --full . /Workspace/Users/<your-email>/WT26_AIbreakout -p DEFAULT
+databricks apps deploy bobabricks-store-ops-demo -p DEFAULT \
+  --source-code-path /Workspace/Users/<your-email>/WT26_AIbreakout
 ```
 
 Use `--full`. A plain `databricks sync` can print "Initial Sync Complete" while
@@ -74,7 +54,6 @@ Confluence stays off even though the deploy reports SUCCEEDED.
 Deployment guardrails:
 
 - Use profile `DEFAULT` (data-ai-lakehouse).
-- Never deploy the repo's own `app.yaml` / `app.yml` to data-ai-lakehouse.
 - Do not run `databricks apps deploy --auto-approve`.
 - Always deploy the app named `bobabricks-store-ops-demo`.
 - Deploy from the synced workspace folder path, not `--source-code-path .`.
@@ -87,8 +66,7 @@ Deployment guardrails:
 
 ## fevm-worldtour-ai (secondary workspace)
 
-Only if the user explicitly asks for fevm-worldtour-ai: use profile
-`fevm-worldtour-ai` plus `-t fevm` on every `databricks` command run inside the repo (databricks.yml defaults to data-ai-lakehouse), the repo's own `app.yaml` / `app.yml` as-is (they hold fevm
-values), and `ATLASSIAN_MCP_URL` =
+Only if the user explicitly asks for fevm-worldtour-ai: copy `deploy/fevm-worldtour-ai/app.yaml`
+and `app.yml` over the root manifests, use profile `fevm-worldtour-ai` plus `-t fevm` on every
+`databricks` command, and `ATLASSIAN_MCP_URL` =
 `https://fevm-worldtour-ai.cloud.databricks.com/api/2.0/mcp/external/system_ai_agent_atlassian_mcp`.
-Skip the export/import steps.

@@ -10,31 +10,31 @@ env:
   - name: MLFLOW_REGISTRY_URI
     value: databricks-uc
   - name: MLFLOW_EXPERIMENT_NAME
-    value: /Users/ad341da9-d12e-4688-ad1c-3c049cf70486/bobabricks-store-ops-demo-uc
+    value: /Users/amber.roberts@databricks.com/mas-0d6cf28f-dev-experiment
   - name: MLFLOW_TRACE_UC_CATALOG
-    value: worldtour_ai_catalog
+    value: bobabricks_demo
   - name: MLFLOW_TRACE_UC_SCHEMA
-    value: ai_gateway_demo
+    value: store_ops
   - name: MLFLOW_TRACE_UC_TABLE_PREFIX
     value: bobabricks
   - name: GENIE_SPACE_ID
-    value: 01f1968067e81bd09eacb0d88bcc57de
+    value: 01f17b1364c914589ab9d24a70bf5b6f
   - name: ENABLE_GENIE_MCP
     value: "true"
   - name: DISABLE_MCP_SERVERS
     value: "false"
   - name: DATABRICKS_WAREHOUSE_ID
-    value: 88fd32ee6d9438ac
+    value: 8561deb2ea8d55c9
   - name: DATABRICKS_CATALOG
-    value: worldtour_ai_catalog
+    value: bobabricks_demo
   - name: DATABRICKS_SCHEMA
-    value: bobabricks_store_ops
+    value: store_ops
   - name: LAKEBASE_ENDPOINT
     value: projects/bobabricks/branches/production/endpoints/primary
   - name: LAKEBASE_INSTANCE_NAME
     value: bobabricks
   - name: LAKEBASE_HOST
-    value: ep-dawn-frog-d8d2j9lp.database.us-east-2.cloud.databricks.com
+    value: ep-misty-cloud-d1p5nild.database.us-west-2.cloud.databricks.com
   - name: LAKEBASE_DATABASE_NAME
     value: databricks_postgres
   - name: LAKEBASE_MEMORY_SCHEMA
@@ -44,8 +44,8 @@ env:
   - name: STORETIME_APP_NAME
     value: bobabricks-storetime-mcp
   - name: STORETIME_MCP_URL
-    value: https://bobabricks-storetime-mcp-7474657163903557.aws.databricksapps.com/mcp
+    value: https://bobabricks-storetime-mcp-2847375137997282.aws.databricksapps.com/mcp
   - name: OPSTASK_APP_NAME
     value: bobabricks-opstask-mcp
   - name: OPSTASK_MCP_URL
-    value: https://bobabricks-opstask-mcp-7474657163903557.aws.databricksapps.com/mcp
+    value: https://bobabricks-opstask-mcp-2847375137997282.aws.databricksapps.com/mcp
