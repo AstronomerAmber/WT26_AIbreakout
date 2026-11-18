@@ -88,7 +88,7 @@ Deployment guardrails:
 ## fevm-worldtour-ai (secondary workspace)
 
 Only if the user explicitly asks for fevm-worldtour-ai: use profile
-`fevm-worldtour-ai`, the repo's own `app.yaml` / `app.yml` as-is (they hold fevm
+`fevm-worldtour-ai` plus `-t fevm` on every `databricks` command run inside the repo (databricks.yml defaults to data-ai-lakehouse), the repo's own `app.yaml` / `app.yml` as-is (they hold fevm
 values), and `ATLASSIAN_MCP_URL` =
 `https://fevm-worldtour-ai.cloud.databricks.com/api/2.0/mcp/external/system_ai_agent_atlassian_mcp`.
 Skip the export/import steps.

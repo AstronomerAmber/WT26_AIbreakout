@@ -18,7 +18,11 @@ resources:
         source_code_path: .
 
 targets:
+  # Live demo workspace. Default so CLI commands run inside the repo resolve here.
   dev:
     default: true
+    workspace:
+      host: https://data-ai-lakehouse.cloud.databricks.com
+  fevm:
     workspace:
       host: https://fevm-worldtour-ai.cloud.databricks.com
